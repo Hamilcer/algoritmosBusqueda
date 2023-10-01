@@ -81,6 +81,10 @@ public class HashInterna {
         System.out.println("Posicion en la estructura: " + (posicion+1));
         return posicion;
     }
+    
+    public int hashCuadrado(int clave) {
+        return 0;
+    }
 
     public int getOpcionHash() {
         return opcionHash;

@@ -39,7 +39,7 @@ class ListaEnlazada {
             System.out.print(actual.dato);
             actual = actual.siguiente;
             if(actual!=null){
-                System.out.println(") -> ");
+                System.out.print(" -> ");
             }
         }
     }

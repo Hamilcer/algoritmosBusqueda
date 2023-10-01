@@ -24,7 +24,7 @@ public class BusquedaInterna {
         this.clavesInsertadas = new int[cantidadClaves];
         this.estructuraClaves = new ListaEnlazada[cantidadClaves];
         funcionHash = new HashInterna(cantidadClaves, this.estructuraClaves);
-        colision = new ColisionInterna(this.estructuraClaves);
+        colision = new ColisionInterna(this.estructuraClaves, this.funcionHash.getRango());
         leerClaves();
 
     }
@@ -59,6 +59,8 @@ public class BusquedaInterna {
         if (this.estructuraClaves[posicion] == null) {
             this.estructuraClaves[posicion] = new ListaEnlazada();
             this.estructuraClaves[posicion].insertarAlFinal(clave);
+        } else if (this.estructuraClaves[posicion].getCabeza().dato == 0) {
+            this.estructuraClaves[posicion].getCabeza().dato = clave;
         } else {
             this.colision.solucionar(posicion, clave);
         }
@@ -68,7 +70,7 @@ public class BusquedaInterna {
 
     public void imprimirArreglo() {
         for (int i = 0; i < this.estructuraClaves.length; i++) {
-            System.out.print((i+1) + " - ");
+            System.out.print((i + 1) + " - ");
             if (this.estructuraClaves[i] == null) {
                 System.out.println("0");
             } else {
