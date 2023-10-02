@@ -78,7 +78,6 @@ public class HashInterna {
 
     public int hashModulo(int clave) {
         int posicion = (clave % rango);
-        System.out.println("Posicion en la estructura: " + (posicion+1));
         return posicion;
     }
     

@@ -25,18 +25,44 @@ public class BusquedaInterna {
         this.estructuraClaves = new ListaEnlazada[cantidadClaves];
         funcionHash = new HashInterna(cantidadClaves, this.estructuraClaves);
         colision = new ColisionInterna(this.estructuraClaves, this.funcionHash.getRango());
-        leerClaves();
+        menu();
 
     }
 
-    public void leerClaves() {
+    public void menu() {
+        while (true) {
+            System.out.println("1. Insertar Clave\n2. Cambiar funcion hash\n3. Realizar busqueda\n4. Salir");
+            int opcionMenu = scanner.nextInt();
+            if (opcionMenu == 1) {
+                agregarClave();
+            } else if (opcionMenu == 2) {
+                this.cambiarFuncionHash();
+            } else if (opcionMenu == 3) {
+                this.buscarClave(leerClave());
+            } else if (opcionMenu == 4) {
+                break;
+            }
+        }
+    }
 
-        while (this.numClavesInsertadas < this.estructuraClaves.length) {
+    public void agregarClave() {
+
+        if (this.numClavesInsertadas < this.estructuraClaves.length) {
             System.out.println("Inserte la clave " + (this.numClavesInsertadas + 1) + ": ");
             int clave = leerClave();
             int posicion = this.funcionHash.aplicarHash(clave);
+            System.out.println("Posicion en la estructura: " + (posicion + 1));
             this.insertarClave(posicion, clave);
+            this.numClavesInsertadas++;
+
+        } else {
+            System.out.println("El arreglo está lleno");
         }
+    }
+
+    public void agregarClave(int clave) {
+        int posicion = this.funcionHash.aplicarHash(clave);
+        this.insertarClave(posicion, clave);
     }
 
     public int leerClave() {
@@ -50,8 +76,9 @@ public class BusquedaInterna {
             scanner.nextLine();
 
         } while (clave < 1000 || clave > 9999);  // Repite mientras el número no tenga 4 cifras
-
-        this.clavesInsertadas[this.numClavesInsertadas] = clave;
+        if (!(this.numClavesInsertadas >= this.estructuraClaves.length)) {
+            this.clavesInsertadas[this.numClavesInsertadas] = clave;
+        }
         return clave;
     }
 
@@ -64,8 +91,90 @@ public class BusquedaInterna {
         } else {
             this.colision.solucionar(posicion, clave);
         }
-        this.numClavesInsertadas++;
         this.imprimirArreglo();
+    }
+
+    public void cambiarFuncionHash() {
+        this.funcionHash = new HashInterna(this.estructuraClaves.length, this.estructuraClaves);
+        this.estructuraClaves = new ListaEnlazada[this.estructuraClaves.length];
+        System.out.println("1. Utilizar claves ya insertadas\n2. NO utilizar claves ya insertadas");
+        int opcionHash = scanner.nextInt();
+        this.funcionHash = new HashInterna(this.estructuraClaves.length, this.estructuraClaves);
+        if (opcionHash == 1) {
+            for (int clave : this.clavesInsertadas) {
+                if (clave == 0) {
+                    break;
+                }
+                this.agregarClave(clave);
+            }
+        } else {
+            this.clavesInsertadas = new int[this.estructuraClaves.length];
+            this.numClavesInsertadas = 0;
+        }
+    }
+
+    public void buscarClave(int clave) {
+        int posicion = this.funcionHash.aplicarHash(clave);
+        if (this.estructuraClaves[posicion] == null) {
+            System.out.println("La clave no esta isnertada");
+        } else if (this.colision.opcionColision == 1) { //secuencial
+            int maxBusqueda = 0; //Con esto se controla el maximo de busquedas
+            while (this.estructuraClaves[posicion] != null && this.estructuraClaves[posicion].getCabeza().dato != 0) {
+                if (this.estructuraClaves[posicion].getCabeza().dato == clave) {
+                    System.out.println("La clave se encuentra en la posicion: " + (posicion + 1));
+                    return;
+                }
+                maxBusqueda++;
+                if (maxBusqueda == this.estructuraClaves.length) {
+                    break;
+                }
+                posicion = (posicion + 1 >= this.estructuraClaves.length) ? 0 : ++posicion;
+            }
+        } else if (this.colision.opcionColision == 2) { //cuadratica
+            int maxBusqueda = 0; //Con esto se controla el maximo de busquedas
+            int i = 1;
+            while (this.estructuraClaves[posicion] != null && this.estructuraClaves[posicion].getCabeza().dato != 0) {
+                if (this.estructuraClaves[posicion].getCabeza().dato == clave) {
+                    System.out.println("La clave se encuentra en la posicion: " + (posicion + 1));
+                    return;
+                }
+                maxBusqueda++;
+                if (maxBusqueda == this.estructuraClaves.length) {
+                    break;
+                }
+                posicion = (posicion + i * i >= this.estructuraClaves.length) ? 0 : posicion + i * i;
+                i++;
+
+            }
+        } else if (this.colision.opcionColision == 3) { //doble hash
+            int maxBusqueda = 0; //Con esto se controla el maximo de busquedas
+            while (this.estructuraClaves[posicion] != null && this.estructuraClaves[posicion].getCabeza().dato != 0) {
+
+                if (this.estructuraClaves[posicion].getCabeza().dato == clave) {
+                    System.out.println("La clave se encuentra en la posicion: " + (posicion + 1));
+                    return;
+                }
+                maxBusqueda++;
+                if (maxBusqueda == this.estructuraClaves.length) {
+                    break;
+                }
+                int nuevaPosicion = (posicion + 1) % this.estructuraClaves.length;
+                posicion = (nuevaPosicion >= this.estructuraClaves.length) ? 0 : nuevaPosicion;
+
+            }
+        } else if (this.colision.opcionColision == 4 || this.colision.opcionColision == 5) {
+            Nodo actual = this.estructuraClaves[posicion].getCabeza();
+            while (actual != null) {
+                if (actual.dato == clave) {
+                    System.out.println("La clave se encuentra en la posicion: " + (posicion + 1));
+                    return;
+                }
+                actual = actual.siguiente;
+            }
+
+        }
+
+        System.out.println("Clave no encontrada.");
     }
 
     public void imprimirArreglo() {
