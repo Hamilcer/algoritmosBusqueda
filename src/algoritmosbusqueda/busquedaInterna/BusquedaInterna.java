@@ -95,13 +95,14 @@ public class BusquedaInterna {
     }
 
     public void cambiarFuncionHash() {
-        this.funcionHash = new HashInterna(this.estructuraClaves.length, this.estructuraClaves);
         this.estructuraClaves = new ListaEnlazada[this.estructuraClaves.length];
+        this.colision.setEstructuraClaves(this.estructuraClaves);
+        this.funcionHash = new HashInterna(this.estructuraClaves.length, this.estructuraClaves);
         System.out.println("1. Utilizar claves ya insertadas\n2. NO utilizar claves ya insertadas");
         int opcionHash = scanner.nextInt();
-        this.funcionHash = new HashInterna(this.estructuraClaves.length, this.estructuraClaves);
         if (opcionHash == 1) {
             for (int clave : this.clavesInsertadas) {
+                System.out.println("Clave: "+clave);
                 if (clave == 0) {
                     break;
                 }
@@ -111,10 +112,14 @@ public class BusquedaInterna {
             this.clavesInsertadas = new int[this.estructuraClaves.length];
             this.numClavesInsertadas = 0;
         }
+        
     }
 
     public void buscarClave(int clave) {
         int posicion = this.funcionHash.aplicarHash(clave);
+        if (posicion >= this.estructuraClaves.length) {
+            posicion = 0;
+        }
         if (this.estructuraClaves[posicion] == null) {
             System.out.println("La clave no esta isnertada");
         } else if (this.colision.opcionColision == 1) { //secuencial

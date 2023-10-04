@@ -22,7 +22,7 @@ public class Main {
         System.out.println("Cantidad de claves a insertar: ");
         int cantidadClaves = scanner.nextInt();
         
-        if(cantidadClaves>99)
+        if(cantidadClaves>100)
         {
             BusquedaExterna externa = new BusquedaExterna(cantidadClaves);
         }

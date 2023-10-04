@@ -106,4 +106,36 @@ public class ColisionInterna {
         this.estructuraClaves[posicion].insertarAlFinal(clave);
     }
 
+    public Scanner getScanner() {
+        return scanner;
+    }
+
+    public void setScanner(Scanner scanner) {
+        this.scanner = scanner;
+    }
+
+    public ListaEnlazada[] getEstructuraClaves() {
+        return estructuraClaves;
+    }
+
+    public void setEstructuraClaves(ListaEnlazada[] estructuraClaves) {
+        this.estructuraClaves = estructuraClaves;
+    }
+
+    public int getOpcionColision() {
+        return opcionColision;
+    }
+
+    public void setOpcionColision(int opcionColision) {
+        this.opcionColision = opcionColision;
+    }
+
+    public int getRango() {
+        return rango;
+    }
+
+    public void setRango(int rango) {
+        this.rango = rango;
+    }
+    
 }
