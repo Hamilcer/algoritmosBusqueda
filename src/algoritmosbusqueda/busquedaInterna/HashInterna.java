@@ -21,7 +21,7 @@ public class HashInterna {
     public HashInterna(int cantidadClaves, ListaEnlazada[] estructuraClaves) {
         this.estructuraClaves = estructuraClaves;
         this.elegirFuncionHash();
-        this.rango = this.calcularRango(cantidadClaves);
+        this.rango = estructuraClaves.length;
     }
 
     public void elegirFuncionHash() {
@@ -35,10 +35,34 @@ public class HashInterna {
         } while (this.opcionHash < 1 || this.opcionHash > 4);
 
         if (this.opcionHash == 1) {
-            this.rango = this.calcularRango(this.estructuraClaves.length);
-            System.out.println("Valor para funcion modulo: " + rango);
+            this.rango = this.calcularRango(this.estructuraClaves.length, this.leerRango());
+        } else {
+            this.rango = this.calcularRango(this.estructuraClaves.length, 3);
         }
-        System.out.println("En el caso de un valor hash mayor al tamaño de la estructura \nse aplicara la funcion modulo utilizando el tamaño de la estructura");
+
+        System.out.println("Valor rango: " + rango);
+
+    }
+
+    public int leerRango() {
+        int numero;
+
+        while (true) {
+            System.out.println("Ahora elige el valor del rango: \n1. Numero primo mas cercano menor\n2. Numero primo mas cercano mayor\n3. Usar cantidad de claves a insertar");
+            try {
+                numero = scanner.nextInt();
+
+                if (numero == 1 || numero == 2 || numero == 3) {
+                    return numero;  // Si es válido, retorna el número
+                } else {
+                    System.out.println("Número no válido. Por favor, ingrese 1, 2 o 3.");
+                }
+
+            } catch (Exception e) {
+                System.out.println("Por favor, ingrese un número entero válido.");
+                scanner.nextLine();  // Limpia el buffer
+            }
+        }
     }
 
     public void elegirFuncionHash(int opcion) {
@@ -61,22 +85,32 @@ public class HashInterna {
         return 0;
     }
 
-    public int calcularRango(int cantidadClaves) {
-        /*if (cantidadClaves < 2) {
-            return -1; // No hay números primos menores que 2
-        }
+    public int calcularRango(int cantidadClaves, int opcion) {
+        int numero = 0;
+        switch (opcion) {
+            case 1:
+                if (cantidadClaves < 2) {
+                    return -1; // No hay números primos menores que 2
+                }
 
-        int numero = cantidadClaves - 1; // Empezamos buscando desde el número anterior al dado
-        while (numero > 1) {
-            if (esPrimo(numero)) {
-                return numero; // Devolvemos el primer primo encontrado
-            }
-            numero--;
-        }
-        return -1;*/
-        int numero = cantidadClaves + 1;
-        while (!esPrimo(numero)) {
-            numero++;
+                numero = cantidadClaves - 1; // Empezamos buscando desde el número anterior al dado
+                while (numero > 1) {
+                    if (esPrimo(numero)) {
+                        return numero; // Devolvemos el primer primo encontrado
+                    }
+                    numero--;
+                }
+                return -1;
+
+            case 2:
+                numero = cantidadClaves + 1;
+                while (!esPrimo(numero)) {
+                    numero++;
+                }
+                break;
+            case 3:
+                numero = cantidadClaves;
+                break;
         }
         return numero;
     }
@@ -103,33 +137,66 @@ public class HashInterna {
 
     public int hashModulo(int clave) {
         int hashValue = (clave % rango);
-        hashValue = (hashValue >= this.estructuraClaves.length) ? hashValue % this.estructuraClaves.length : hashValue;
+        hashValue = (hashValue >= this.estructuraClaves.length) ? 0 : hashValue;
+
+        System.out.println("Posicion en la estructura: " + (hashValue + 1));
         return hashValue;
     }
 
     public int hashCuadrado(int clave) {
-        String cuadrado = String.valueOf(clave * clave);
-        int hashValue = 0;
+        long cuadrado = (long) clave * clave;  // Usamos long para evitar desbordamiento
 
-        if (cuadrado.length() > 7) {
-            hashValue = Integer.parseInt(cuadrado.substring(3, 4) + cuadrado.subSequence(4, 5));
-        } else {
-            hashValue = Integer.parseInt(cuadrado.substring(2, 3) + cuadrado.subSequence(3, 4));
+        int digitos = this.contarCeros(this.rango);
+        String cuadradoStr = String.valueOf(cuadrado);
+
+        // Comprobamos si el cuadrado tiene menos dígitos que lo requerido
+        if (cuadradoStr.length() < digitos) {
+            return (int) cuadrado;  // Simplemente retornamos el cuadrado si es demasiado corto
         }
 
-        hashValue = (hashValue >= this.estructuraClaves.length) ? hashValue % this.estructuraClaves.length : hashValue;
+        // Tomamos los dígitos del medio
+        int inicio = (cuadradoStr.length() - digitos) / 2;
+        int fin = inicio + digitos;
+        String subconjunto = cuadradoStr.substring(inicio, fin);
+        int hashValue = Integer.parseInt(subconjunto);
+        System.out.println("Posicion en la estructura: " + (hashValue + 1));
+
+        return Integer.parseInt(subconjunto);
+    }
+
+    public int hashPlegamiento(int c) {
+        String clave = Integer.toString(c);
+        int segmentoSize = this.contarCeros(this.rango);
+        int hashValue = 0;
+
+        for (int i = 0; i < clave.length(); i += segmentoSize) {
+            String segmento;
+            if (i + segmentoSize <= clave.length()) {
+                segmento = clave.substring(i, i + segmentoSize);
+            } else {
+                segmento = clave.substring(i);
+            }
+            hashValue += Integer.parseInt(segmento);
+        }
+        hashValue = (hashValue >= this.rango) ? hashValue % this.rango : hashValue;
+        System.out.println("Posicion en la estructura: " + (hashValue + 1));
         return hashValue;
     }
 
-    public int hashPlegamiento(int clave) {
-        int hashValue = (clave / 100) + (clave % 100);
-        hashValue = (hashValue >= this.estructuraClaves.length) ? hashValue % this.estructuraClaves.length : hashValue;
-        return hashValue;
-    }
+    public int hashTruncamiento(int clave) { 
+        int digitos = this.contarCeros(this.rango);
+        String strClave = Integer.toString(clave);
+        if (strClave.length() < digitos) {
+            System.out.println("Posicion en la estructura: " + (clave + 1));
+            return clave;
+        }
 
-    public int hashTruncamiento(int clave) {
-        int hashValue = (clave / 10) % 100;
-        hashValue = (hashValue >= this.estructuraClaves.length) ? hashValue % this.estructuraClaves.length : hashValue;
+        int inicio = (strClave.length() - digitos) / 2;
+        int fin = inicio + digitos;
+        String subconjunto = strClave.substring(inicio, fin);
+        int hashValue = Integer.parseInt(subconjunto);
+        System.out.println("Posicion en la estructura: " + (hashValue + 1));
+
         return hashValue;
     }
 
@@ -149,4 +216,12 @@ public class HashInterna {
         this.rango = rango;
     }
 
+    public int contarCeros(int potenciaDeDiez) {
+        int contador = 0;
+        while (potenciaDeDiez > 1) {
+            contador++;
+            potenciaDeDiez /= 10;
+        }
+        return contador;
+    }
 }

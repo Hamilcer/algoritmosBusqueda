@@ -25,9 +25,7 @@ public class Main {
         while(caso != 0){
         switch (tipoBusqueda) {
             case 1 -> {
-                System.out.println("Cantidad de claves a insertar: ");
-                int cantidadClaves = scanner.nextInt();
-                BusquedaInterna interna = new BusquedaInterna(cantidadClaves);
+                BusquedaInterna interna = new BusquedaInterna();
             }
             case 2 -> {
                 BusquedaExterna externa = new BusquedaExterna();

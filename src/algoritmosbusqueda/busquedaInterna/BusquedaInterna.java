@@ -19,19 +19,21 @@ public class BusquedaInterna {
     int[] clavesInsertadas; //Se usa en el caso de cambiar funcion hash
     int numClavesInsertadas = 0;
 
-    public BusquedaInterna(int cantidadClaves) {
+    public BusquedaInterna() {
         System.out.println("Modo busqueda interna");
-        this.clavesInsertadas = new int[cantidadClaves];
-        this.estructuraClaves = new ListaEnlazada[cantidadClaves];
-        funcionHash = new HashInterna(cantidadClaves, this.estructuraClaves);
-        colision = new ColisionInterna(this.estructuraClaves, this.funcionHash.getRango());
         menu();
 
     }
 
     public void menu() {
+        int cantidadClaves = this.solicitarPotenciaDeDiez();
+        this.clavesInsertadas = new int[cantidadClaves];
+        this.estructuraClaves = new ListaEnlazada[cantidadClaves];
+        funcionHash = new HashInterna(cantidadClaves, this.estructuraClaves);
+        colision = new ColisionInterna(this.estructuraClaves, this.funcionHash.getRango());
+
         while (true) {
-            System.out.println("1. Insertar Clave\n2. Cambiar funcion hash\n3. Realizar busqueda\n4. Salir");
+            System.out.println("1. Insertar Clave\n2. Cambiar funcion hash\n3. Realizar busqueda\n4. Imprimir estructura \n5. Salir");
             int opcionMenu = scanner.nextInt();
             if (opcionMenu == 1) {
                 agregarClave();
@@ -40,9 +42,47 @@ public class BusquedaInterna {
             } else if (opcionMenu == 3) {
                 this.buscarClave(leerClave());
             } else if (opcionMenu == 4) {
+                this.imprimirArreglo();
+            } else if (opcionMenu == 5) {
                 break;
             }
         }
+    }
+
+    public int solicitarPotenciaDeDiez() {
+        Scanner scanner = new Scanner(System.in);
+        int numero = 0;
+        boolean esPotenciaDeDiez;
+        System.out.println("Primero se va a definir la cantidad de claves a insertar");
+        do {
+            System.out.println("Ingrese un número que sea potencia de 10:");
+            try {
+                numero = scanner.nextInt();
+                esPotenciaDeDiez = esPotenciaDeDiez(numero);
+                if (!esPotenciaDeDiez) {
+                    System.out.println("El número ingresado no es una potencia de 10. Intente de nuevo.");
+                }
+            } catch (Exception e) {
+                System.out.println("Por favor, ingrese un número válido.");
+                scanner.nextLine();  // Limpia el buffer
+                esPotenciaDeDiez = false;
+            }
+        } while (!esPotenciaDeDiez);
+
+        return numero;
+    }
+
+    public boolean esPotenciaDeDiez(int n) {
+        if (n <= 0) {
+            return false;
+        }
+        while (n > 1) {
+            if (n % 10 != 0) {
+                return false;
+            }
+            n /= 10;
+        }
+        return true;
     }
 
     public void agregarClave() {
@@ -51,7 +91,6 @@ public class BusquedaInterna {
             System.out.println("Inserte la clave " + (this.numClavesInsertadas + 1) + ": ");
             int clave = leerClave();
             int posicion = this.funcionHash.aplicarHash(clave);
-            System.out.println("Posicion en la estructura: " + (posicion + 1));
             this.insertarClave(posicion, clave);
             this.numClavesInsertadas++;
 
@@ -102,7 +141,7 @@ public class BusquedaInterna {
         } else {
             this.colision.solucionar(posicion, clave);
         }
-        this.imprimirArreglo();
+        //this.imprimirArreglo();
     }
 
     public void cambiarFuncionHash() {
@@ -111,6 +150,8 @@ public class BusquedaInterna {
         this.funcionHash = new HashInterna(this.estructuraClaves.length, this.estructuraClaves);
         System.out.println("1. Utilizar claves ya insertadas\n2. NO utilizar claves ya insertadas");
         int opcionHash = scanner.nextInt();
+        System.out.println("----------------------------------------");
+        System.out.println("---------------Cambiando...-------------");
         if (opcionHash == 1) {
             for (int clave : this.clavesInsertadas) {
                 System.out.println("Clave: " + clave);
