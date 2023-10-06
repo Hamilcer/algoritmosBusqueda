@@ -4,6 +4,7 @@
  */
 package algoritmosbusqueda.busquedaInterna;
 
+import java.util.Arrays;
 import java.util.Scanner;
 
 /**
@@ -14,33 +15,38 @@ public class HashInterna {
 
     Scanner scanner = new Scanner(System.in);
     ListaEnlazada[] estructuraClaves;
-
+    int[] clavesInsertadas;
+    int numClavesInsertadas = 0;
     int opcionHash;
     int rango;
 
-    public HashInterna(int cantidadClaves, ListaEnlazada[] estructuraClaves) {
+    public HashInterna(int cantidadClaves, ListaEnlazada[] estructuraClaves, int[] clavesInsertadas, int numClavesInsertadas, int[] arregloOrdenado) {
         this.estructuraClaves = estructuraClaves;
         this.elegirFuncionHash();
-        this.rango = estructuraClaves.length;
+//        this.rango = estructuraClaves.length;
+        this.clavesInsertadas = clavesInsertadas;
+        this.numClavesInsertadas = numClavesInsertadas;
     }
 
     public void elegirFuncionHash() {
-        System.out.println("Elige la funcion hash:\n1. Modulo\n2. Cuadrado\n3. Truncamiento\n4. Plegamiento");
+        System.out.println("Elige metodo de busqueda:\n1. Modulo\n2. Cuadrado\n3. Truncamiento\n4. Plegamiento\n5. Secuencial\n6. binaria");
         do {
             while (!scanner.hasNextInt()) { // Si el input no es un número entero
                 System.out.println("Eso no es un número válido. Inténtalo de nuevo.");
                 scanner.next(); // Descarta el input anterior
             }
             this.opcionHash = scanner.nextInt();
-        } while (this.opcionHash < 1 || this.opcionHash > 4);
+        } while (this.opcionHash < 1 || this.opcionHash > 6);
 
         if (this.opcionHash == 1) {
             this.rango = this.calcularRango(this.estructuraClaves.length, this.leerRango());
+            System.out.println("Valor rango: " + rango);
+        } else if (this.opcionHash == 5 || this.opcionHash == 6) {// no hay rango
+            this.rango = 0;
         } else {
             this.rango = this.calcularRango(this.estructuraClaves.length, 3);
+            System.out.println("Valor rango: " + rango);
         }
-
-        System.out.println("Valor rango: " + rango);
 
     }
 
@@ -80,6 +86,10 @@ public class HashInterna {
                 return this.hashTruncamiento(clave);
             case 4:
                 return this.hashPlegamiento(clave);
+            case 5:
+                return this.secuencial(clave);
+            case 6:
+                return this.binaria(clave);
 
         }
         return 0;
@@ -135,6 +145,25 @@ public class HashInterna {
         return true;
     }
 
+    public int secuencial(int clave) {
+        return this.buscarPosicion(this.clavesInsertadas, clave);
+    }
+
+    public int binaria(int clave) {
+        int j = 0;
+        int[] arrOrdenado = this.clavesInsertadas.clone();
+        Arrays.sort(arrOrdenado);
+        for (int i = 0; i < arrOrdenado.length; i++) {
+            if (arrOrdenado[i] != 0) {
+                this.estructuraClaves[i - j] = new ListaEnlazada();
+                this.estructuraClaves[i - j].insertarAlFinal(arrOrdenado[i]);
+            } else {
+                j++;
+            }
+        }
+        return -1;
+    }
+
     public int hashModulo(int clave) {
         int hashValue = (clave % rango);
         hashValue = (hashValue >= this.estructuraClaves.length) ? 0 : hashValue;
@@ -183,14 +212,13 @@ public class HashInterna {
         return hashValue;
     }
 
-    public int hashTruncamiento(int clave) { 
+    public int hashTruncamiento(int clave) {
         int digitos = this.contarCeros(this.rango);
         String strClave = Integer.toString(clave);
         if (strClave.length() < digitos) {
             System.out.println("Posicion en la estructura: " + (clave + 1));
             return clave;
         }
-
         int inicio = (strClave.length() - digitos) / 2;
         int fin = inicio + digitos;
         String subconjunto = strClave.substring(inicio, fin);
@@ -223,5 +251,14 @@ public class HashInterna {
             potenciaDeDiez /= 10;
         }
         return contador;
+    }
+
+    public int buscarPosicion(int[] arreglo, int numero) {
+        for (int i = 0; i < arreglo.length; i++) {
+            if (arreglo[i] == numero) {
+                return i;
+            }
+        }
+        return -1; // Si no se encuentra el número en el arreglo
     }
 }

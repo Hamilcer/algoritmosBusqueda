@@ -3,10 +3,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
 package algoritmosbusqueda;
+
 import algoritmosbusqueda.busquedaExterna.BusquedaExterna;
 import algoritmosbusqueda.busquedaInterna.BusquedaInterna;
 import java.util.Scanner;
-
 
 /**
  *
@@ -19,25 +19,21 @@ public class Main {
      */
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Que tipo de busqueda desea implementar 1 interna 2 externa");
+        System.out.println("Que tipo de busqueda desea implementar \n1. interna \n2. externa\n3. Finalizar programa");
         int tipoBusqueda = scanner.nextInt();
-        int caso = 2;
-        while(caso != 0){
-        switch (tipoBusqueda) {
-            case 1 -> {
-                BusquedaInterna interna = new BusquedaInterna();
+        while (tipoBusqueda != 3) {
+            switch (tipoBusqueda) {
+                case 1 -> {
+                    BusquedaInterna interna = new BusquedaInterna();
+                }
+                case 2 -> {
+                    BusquedaExterna externa = new BusquedaExterna();
+                }
+                default ->
+                    System.out.println("Ingrese un numero valido");
             }
-            case 2 -> {
-                BusquedaExterna externa = new BusquedaExterna();
-            }
-            case 3 -> {
-                System.out.println("escogio finalizar programa");
-                caso = 0;
-            }
-            default -> System.out.println("no incerto un numero del menu");
+            System.out.println("Que tipo de busqueda desea implementar \n1. interna \n2. externa\n3. Finalizar programa");
+            tipoBusqueda = scanner.nextInt();
         }
-        System.out.println("Que tipo de busqueda desea implementar 1 interna 2 externa");
-        tipoBusqueda = scanner.nextInt();
-    }
     }
 }

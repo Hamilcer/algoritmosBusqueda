@@ -18,6 +18,7 @@ public class BusquedaInterna {
     ListaEnlazada[] estructuraClaves;
     int[] clavesInsertadas; //Se usa en el caso de cambiar funcion hash
     int numClavesInsertadas = 0;
+    int[] arregloOrdenado;
 
     public BusquedaInterna() {
         System.out.println("Modo busqueda interna");
@@ -29,18 +30,18 @@ public class BusquedaInterna {
         int cantidadClaves = this.solicitarPotenciaDeDiez();
         this.clavesInsertadas = new int[cantidadClaves];
         this.estructuraClaves = new ListaEnlazada[cantidadClaves];
-        funcionHash = new HashInterna(cantidadClaves, this.estructuraClaves);
-        colision = new ColisionInterna(this.estructuraClaves, this.funcionHash.getRango());
+        this.funcionHash = new HashInterna(cantidadClaves, this.estructuraClaves, this.clavesInsertadas, this.numClavesInsertadas, this.arregloOrdenado);
+        this.colision = new ColisionInterna(this.estructuraClaves, this.funcionHash.getRango());
 
         while (true) {
-            System.out.println("1. Insertar Clave\n2. Cambiar funcion hash\n3. Realizar busqueda\n4. Imprimir estructura \n5. Salir");
+            System.out.println("1. Insertar Clave\n2. Cambiar solucion colision y funcion hash\n3. Realizar busqueda\n4. Imprimir estructura \n5. Salir");
             int opcionMenu = scanner.nextInt();
             if (opcionMenu == 1) {
                 agregarClave();
             } else if (opcionMenu == 2) {
                 this.cambiarFuncionHash();
             } else if (opcionMenu == 3) {
-                this.buscarClave(leerClave());
+                this.buscarClave(this.leerClaveBuscar());
             } else if (opcionMenu == 4) {
                 this.imprimirArreglo();
             } else if (opcionMenu == 5) {
@@ -73,7 +74,7 @@ public class BusquedaInterna {
     }
 
     public boolean esPotenciaDeDiez(int n) {
-        if (n <= 0) {
+        if (n <= 0 || n == 1) {
             return false;
         }
         while (n > 1) {
@@ -91,7 +92,9 @@ public class BusquedaInterna {
             System.out.println("Inserte la clave " + (this.numClavesInsertadas + 1) + ": ");
             int clave = leerClave();
             int posicion = this.funcionHash.aplicarHash(clave);
-            this.insertarClave(posicion, clave);
+            if (posicion != -1) {
+                this.insertarClave(posicion, clave);
+            }
             this.numClavesInsertadas++;
 
         } else {
@@ -105,24 +108,50 @@ public class BusquedaInterna {
     }
 
     public int leerClave() {
-        int clave;
+        int clave = 0;
 
         boolean seguir = true;
         do {
-            System.out.print("Por favor, ingresa un número de 4 cifras: ");
-            clave = scanner.nextInt();
+            System.out.print("Por favor ingrese un numero entero positivo ");
+            try {
+                clave = scanner.nextInt();
+
+            } catch (Exception e) {
+                System.out.println("Ingrese un numero valido menor a 2,147,483,647");
+            }
 
             // Limpiar el buffer (por el salto de línea que queda después de usar nextInt())
             scanner.nextLine();
             seguir = this.verificarExiste(clave);
-        } while (clave < 1000 || clave > 9999 || seguir);  // Repite mientras el número no tenga 4 cifras
+        } while (clave < 1 || clave > 2147483647 || seguir);  // Repite mientras el número no tenga 4 cifras
         if (!(this.numClavesInsertadas >= this.estructuraClaves.length)) {
             this.clavesInsertadas[this.numClavesInsertadas] = clave;
         }
         return clave;
     }
 
+    public int leerClaveBuscar() {
+        int clave = 0;
+
+        do {
+            System.out.print("Por favor ingrese un numero entero positivo ");
+            try {
+                clave = scanner.nextInt();
+
+            } catch (Exception e) {
+                System.out.println("Ingrese un numero valido menor a 2,147,483,647");
+            }
+
+            // Limpiar el buffer (por el salto de línea que queda después de usar nextInt())
+            scanner.nextLine();
+        } while (clave < 1 || clave > 2147483647);  // Repite mientras el número no tenga 4 cifras
+        return clave;
+    }
+
     public boolean verificarExiste(int clave) {
+        if (clave == 0) {
+            return true;
+        }
         for (int i : this.clavesInsertadas) {
             if (i == clave) {
                 System.out.println("¡Número repetido! Este número ya se encuentra ingresado.");
@@ -146,24 +175,29 @@ public class BusquedaInterna {
 
     public void cambiarFuncionHash() {
         this.estructuraClaves = new ListaEnlazada[this.estructuraClaves.length];
-        this.colision.setEstructuraClaves(this.estructuraClaves);
-        this.funcionHash = new HashInterna(this.estructuraClaves.length, this.estructuraClaves);
+        this.colision = new ColisionInterna(this.estructuraClaves, this.funcionHash.getRango());
+        this.funcionHash = new HashInterna(this.estructuraClaves.length, this.estructuraClaves, this.clavesInsertadas, this.numClavesInsertadas, this.arregloOrdenado);
+        this.colision.setRango(this.funcionHash.getRango());
         System.out.println("1. Utilizar claves ya insertadas\n2. NO utilizar claves ya insertadas");
         int opcionHash = scanner.nextInt();
         System.out.println("----------------------------------------");
         System.out.println("---------------Cambiando...-------------");
         if (opcionHash == 1) {
             for (int clave : this.clavesInsertadas) {
-                System.out.println("Clave: " + clave);
                 if (clave == 0) {
                     break;
+                } else if (this.funcionHash.getOpcionHash() == 6) {
+                    this.funcionHash.aplicarHash(clave);
+                } else {
+                    this.agregarClave(clave);
                 }
-                this.agregarClave(clave);
+                System.out.println("Clave: " + clave);
             }
         } else {
             this.clavesInsertadas = new int[this.estructuraClaves.length];
             this.numClavesInsertadas = 0;
         }
+        System.out.println("Cambio Finalizado");
 
     }
 
@@ -172,9 +206,19 @@ public class BusquedaInterna {
         if (posicion >= this.estructuraClaves.length) {
             posicion = 0;
         }
-        if (this.estructuraClaves[posicion] == null) {
+        if(posicion==-1){
+            for(int i =0;i<this.estructuraClaves.length;i++){
+                if(this.estructuraClaves[i] != null && this.estructuraClaves[i].getCabeza().dato == clave){
+                    System.out.println("La clave esta en la posicion: " + (i+1));
+                    return;
+                }
+            }
+            System.out.println("Clave no encontrada.");
+            return;
+        }
+        if (posicion != -1 && this.estructuraClaves[posicion] == null) {
             System.out.println("La clave no esta isnertada");
-        } else if (this.colision.opcionColision == 1) { //secuencial
+        } else if (this.colision.opcionColision == 1 || this.colision.opcionColision == -1) { //secuencial
             int maxBusqueda = 0; //Con esto se controla el maximo de busquedas
             while (this.estructuraClaves[posicion] != null && this.estructuraClaves[posicion].getCabeza().dato != 0) {
                 if (this.estructuraClaves[posicion].getCabeza().dato == clave) {

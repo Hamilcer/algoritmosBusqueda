@@ -19,7 +19,11 @@ public class ColisionInterna {
 
     public ColisionInterna(ListaEnlazada[] estructuraClaves, int rango) {
         this.estructuraClaves = estructuraClaves;
-        this.elegirColision();
+        if (rango == 0) {
+            this.opcionColision = 1;
+        } else {
+            this.elegirColision();
+        }
         this.rango = rango;
     }
 
@@ -137,5 +141,5 @@ public class ColisionInterna {
     public void setRango(int rango) {
         this.rango = rango;
     }
-    
+
 }
